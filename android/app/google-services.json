@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "706356993842",
+    "project_id": "tswcd-1ddcb",
+    "storage_bucket": "tswcd-1ddcb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:706356993842:android:be3e69bf9c60ef7cf7012b",
+        "android_client_info": {
+          "package_name": "com.example.tswcd"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAiGIueUgEUQiNVc9fKtpeI79E2PvzLipE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

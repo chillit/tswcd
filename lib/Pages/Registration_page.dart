@@ -87,7 +87,7 @@ class _MyHomePageState extends State<Registration> {
       }
     });
   }
-  Future<void> registerUser(String email, String password) async {
+  Future<void> registerUser(String email, String password,String name) async {
     try {
       UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
@@ -95,7 +95,7 @@ class _MyHomePageState extends State<Registration> {
       );
       // After successful registration, UID is available from `userCredential.user`
       String uid = userCredential.user!.uid;
-
+      addUserToRealtimeDatabase(uid,name,email);
       // Use the UID to save user information under the 'users' branch in Realtime Database
 
     } on FirebaseAuthException catch (e) {
@@ -108,10 +108,18 @@ class _MyHomePageState extends State<Registration> {
 
   Future<void> addUserToRealtimeDatabase(String uid, String name, String email) async {
     DatabaseReference databaseRef = FirebaseDatabase.instance.ref('users/$uid');
-    await databaseRef.set({
-      'name': name,
+    await FirebaseDatabase.instance.ref('users/${uid}').set({
       'email': email,
-
+      'name': namecontroller.text.trim(),
+      'IIN': '',
+      'role': 'default',
+      'interests': {
+        'sport': 0,
+        'IT':0,
+        'culture':0,
+        'charity':0,
+        'study':0,
+      }
     });
   }
 
@@ -489,7 +497,7 @@ class _MyHomePageState extends State<Registration> {
                                           .showSnackBar(SnackBar(content: Text('Аккаунт успешно создан')));
 
                                       // Call your registration logic here
-                                      registerUser(emailcontroller.text.trim(), passwordcontroller.text.trim());
+                                      registerUser(emailcontroller.text.trim(), passwordcontroller.text.trim(),namecontroller.text.trim());
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(

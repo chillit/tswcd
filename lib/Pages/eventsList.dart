@@ -1,3 +1,5 @@
+import 'dart:html';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -13,13 +15,37 @@ class EventList extends StatefulWidget {
 }
 
 class _EventListState extends State<EventList> {
+  late Map<String, dynamic> currentUserData;
+  final currentUser = FirebaseAuth.instance.currentUser;
+  bool loading = true;
+
+  void getCurrentUserData() {
+    DatabaseReference usersRef = FirebaseDatabase.instance
+        .reference()
+        .child('users')
+        .child(currentUser!.uid);
+    usersRef.once().then((DatabaseEvent snapshot) {
+      if (snapshot.snapshot.value != null) {
+        setState(() {
+          currentUserData = Map<String, dynamic>.from(snapshot.snapshot.value as Map<String, dynamic>);
+          loading = false;
+        });
+      }
+    });
+  }
+  Map<String, IconData> categoryIconMap = {};
+  @override
+  void initState() {
+    super.initState();
+    getCurrentUserData();
+  }
   List<String> _categories = ['IT', 'study', 'charity', 'sport', 'culture'];
   List<String> _selectedCategories = [];
   final databaseReference = FirebaseDatabase.instance.reference().child('events');
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   DateTime? _selectedDay;
   Map<String, List<IconData>> categoryIcons = {
-    'it': [Icons.computer, Icons.desktop_mac, Icons.router],
+    'IT': [Icons.computer, Icons.desktop_mac, Icons.router],
     'study': [Icons.menu_book, Icons.school, Icons.library_books],
     'charity': [Icons.favorite, Icons.volunteer_activism, Icons.favorite_border],
     'sport': [Icons.sports_soccer, Icons.sports_basketball, Icons.sports_baseball],
@@ -30,7 +56,7 @@ class _EventListState extends State<EventList> {
       List<IconData> icons = categoryIcons[category]!;
       return icons[Random().nextInt(icons.length)];
     } else {
-      return Icons.event;
+      return Icons.event; // Возвращаем заглушку, если категория не найдена
     }
   }
   List<List<String>> setsOfCategories = [
@@ -52,7 +78,8 @@ class _EventListState extends State<EventList> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return loading?Center(child: CircularProgressIndicator(),):
+    Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
         title: Text('My App'),
@@ -68,8 +95,10 @@ class _EventListState extends State<EventList> {
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.0),
         child: StreamBuilder<DatabaseEvent>(
+
           stream: databaseReference.onValue,
           builder: (context, snapshot) {
+
             if (snapshot.hasData && snapshot.data != null) {
               DataSnapshot dataValues = snapshot.data!.snapshot;
               if (dataValues.value != null) {
@@ -82,13 +111,29 @@ class _EventListState extends State<EventList> {
                     events.add(value);
                   });
                 }
+                events.sort((a, b) {
+                  int aPoints = currentUserData['interests'][a['type']] ?? 0;
+                  int bPoints = currentUserData['interests'][b['type']] ?? 0;
+                  if (aPoints == bPoints) {
+                    return Random().nextInt(2) * 2 - 1; // Randomly shuffle equal categories
+                  }
+                  return bPoints.compareTo(aPoints); // Sort based on points
+                });
 
                 events = events.where((event) {
-                  DateTime eventDate = DateTime.parse(event['date']);
-                  return (_selectedCategories.isEmpty || _selectedCategories.contains(event['type'])) &&
-                      (_selectedDay == null ||
-                          (eventDate.isAfter(_selectedDay!.subtract(Duration(days: 1))) &&
-                              eventDate.isBefore(_selectedDay!.add(Duration(days: 1)))));
+                  DateTime eventStartDate = DateTime.parse(event['date']);
+                  DateTime eventEndDate = DateTime.parse(event['end_date']);
+
+                  // Проверяем, содержится ли выбранный тип в событии
+                  bool isTypeMatched = _selectedCategories.isEmpty ||
+                      _selectedCategories.contains(event['type']);
+
+                  // Проверяем, попадает ли событие в выбранный временной промежуток
+                  bool isDateInRange = _selectedDay == null ||
+                      (eventStartDate.isBefore(_selectedDay!.add(Duration(days: 1))) &&
+                          eventEndDate.isAfter(_selectedDay!.subtract(Duration(days: 1))));
+
+                  return isTypeMatched && isDateInRange;
                 }).toList();
 
                 final double screenWidth = MediaQuery.of(context).size.width;
@@ -97,6 +142,7 @@ class _EventListState extends State<EventList> {
                 if (screenWidth>screenHeight) {
                   crossAxisCount = 4;
                 }
+
 
                 return GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -109,15 +155,31 @@ class _EventListState extends State<EventList> {
                   itemBuilder: (BuildContext context, int index) {
                     return GestureDetector(
                       onTap: () {
+                        final currentUser = FirebaseAuth.instance.currentUser;
+                        DatabaseReference usersRef = FirebaseDatabase.instance.reference().child('users').child(currentUser!.uid).child('interests').child(events[index]['type']);
+                        usersRef.once().then((DatabaseEvent snapshot) {
+                          if (snapshot.snapshot.value != null) {
+                            // Если значение уже существует, увеличиваем его на 1
+                            usersRef.set((snapshot.snapshot.value as int) + 1);
+                          } else {
+                            // Если значение не существует, устанавливаем его как 1
+                            usersRef.set(1);
+                          }
+                        });
+
+                        // Переход на страницу деталей события
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => EventDetailsPage(
+                          MaterialPageRoute(
+                            builder: (context) => EventDetailsPage(
                               startDate: events[index]['date'],
                               endDate: events[index]['end_date'],
                               title: events[index]['title'],
                               type: events[index]['type'],
                               smallDescription: events[index]['small_description'],
-                              largeDescription: events[index]['full_description'])),
+                              largeDescription: events[index]['full_description'],
+                            ),
+                          ),
                         );
                       },
 
@@ -175,6 +237,10 @@ class _EventListState extends State<EventList> {
                   _selectedDay = selectedDay;
                 });
               },
+              headerStyle: HeaderStyle(
+                formatButtonVisible: false, // Устанавливаем значение false, чтобы скрыть кнопку
+                titleCentered: true,
+              ),
             ),
             SizedBox(height: 5,),
             Padding(
@@ -186,12 +252,12 @@ class _EventListState extends State<EventList> {
             ),
             SizedBox(height: 5,),
             Padding(padding: EdgeInsetsDirectional.only(start: 16),
-            child: Text(
-              'Фильтры:',
-              softWrap: true,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.black,fontFamily: 'Futura'),
-            ),),
+              child: Text(
+                'Фильтры:',
+                softWrap: true,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.black,fontFamily: 'Futura'),
+              ),),
             SizedBox(height: 10,),
             ...setsOfCategories.map((set) => Wrap(
               spacing: 8.0, // Horizontal spacing between chips
@@ -210,6 +276,36 @@ class _EventListState extends State<EventList> {
                 },
               )).toList(),
             )).toList(),
+            SizedBox(height: 20,),
+            Padding(
+              padding: EdgeInsetsDirectional.only(start: 20, end: 20),
+              child: ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _selectedDay = null;
+                    _selectedCategories.clear();
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey, // Замените на ваш цвет по вашему выбору
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Сбросить фильтры',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w100,
+                        fontFamily: 'Futura',
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             SizedBox(height: 5,),
             Padding(
               padding: EdgeInsetsDirectional.only(start: 16,end: 16),
@@ -264,30 +360,30 @@ class _EventListState extends State<EventList> {
               padding: EdgeInsetsDirectional.only(start: 20,end: 20),
               child: ElevatedButton(onPressed:
                   (){
-                    signOut();
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => MyHomePage()),
-                    );
-                  },
+                signOut();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => MyHomePage()),
+                );
+              },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red
+                    backgroundColor: Colors.red
                 ),
                 child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    'Выйти с аккаунта',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w100,
-                      fontFamily: 'Futura',
-                      color: Colors.white,
-                      fontSize: 16,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Выйти с аккаунта',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w100,
+                        fontFamily: 'Futura',
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
                     ),
-                  ),
-                ],
-              ),),
+                  ],
+                ),),
             ),
 
           ],

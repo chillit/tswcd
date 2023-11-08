@@ -2,6 +2,7 @@ import 'dart:js';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:tswcd/Pages/Registration_page.dart';
 import 'package:tswcd/Pages/eventsList.dart';
@@ -49,7 +50,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: EventList(),
+      home: MyHomePage(),
     );
   }
 }
@@ -60,10 +61,37 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  void checkEvents() {
+    final databaseRef = FirebaseDatabase.instance.reference();
+    final eventsRef = databaseRef.child('events');
+
+    eventsRef.once().then((DatabaseEvent snapshot) {
+      Map<dynamic, dynamic> values = snapshot.snapshot.value as Map<dynamic, dynamic>;
+      values.forEach((key, values) {
+        // Получите end_date из значений
+        DateTime endDate = DateTime.parse(values['end_date']);
+
+        // Получите текущую дату
+        DateTime now = DateTime.now();
+
+        // Сравните даты и выполните необходимые действия
+        if (endDate.isBefore(now)) {
+          print('Document with key $key has end_date before today.');
+          // Удалите документ из базы данных
+          eventsRef.child(key).remove().then((_) {
+            print("Document deleted successfully");
+          }).catchError((error) {
+            print("Failed to delete the document: $error");
+          });
+        }
+      });
+    });
+  }
   void signUserIn(BuildContext context) async {
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: emailcontroller.text, password: passwordcontroller.text);
+      checkEvents();
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => EventList()),

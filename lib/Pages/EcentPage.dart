@@ -1,0 +1,244 @@
+
+import 'dart:math';
+
+import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
+
+class EventDetailsPage extends StatelessWidget {
+  final String startDate;
+  final String endDate;
+  final String title;
+  final String type;
+  final String smallDescription;
+  final String largeDescription;
+
+  EventDetailsPage({
+    required this.startDate,
+    required this.endDate,
+    required this.title,
+    required this.type,
+    required this.smallDescription,
+    required this.largeDescription,
+  });
+
+  String getMonthInText(String date) {
+    DateTime dateTime = DateTime.parse(date);
+    List<String> months = [
+      '', // Пустой элемент для компенсации индексации с 1
+      'Январь',
+      'Февраль',
+      'Март',
+      'Апрель',
+      'Май',
+      'Июнь',
+      'Июль',
+      'Август',
+      'Сентябрь',
+      'Октябрь',
+      'Ноябрь',
+      'Декабрь',
+    ];
+    return months[dateTime.month];
+  }
+  Map<String, List<IconData>> categoryIcons = {
+    'it': [Icons.computer, Icons.desktop_mac, Icons.router],
+    'study': [Icons.menu_book, Icons.school, Icons.library_books],
+    'charity': [Icons.favorite, Icons.volunteer_activism, Icons.favorite_border],
+    'sport': [Icons.sports_soccer, Icons.sports_basketball, Icons.sports_baseball],
+    'culture': [Icons.palette, Icons.theater_comedy, Icons.music_note],
+  };
+
+  IconData getIconForCategory(String category) {
+    if (categoryIcons.containsKey(category)) {
+      List<IconData> icons = categoryIcons[category]!;
+      return icons[Random().nextInt(icons.length)];
+    } else {
+      return Icons.event;
+    }
+  }
+  final databaseReference = FirebaseDatabase.instance.reference().child('events');
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Event Details'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${DateTime.parse(startDate).day.toString().padLeft(2, '0')}',
+                        style: TextStyle(fontSize: 60, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        '${getMonthInText(startDate)}',
+                        style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  SizedBox(width: 20),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Title: $title',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          'Type: $type',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          'Start Date: $startDate',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          'End Date: $endDate',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          'Small Description: $smallDescription',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          'Large Description: $largeDescription',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+              SizedBox(height: 30),
+              Row(
+                children: [
+                  SizedBox(width: 16,),
+                  Expanded(
+                  child: Divider(
+                    thickness: 0.5,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                  SizedBox(width: 6,),
+                Text('Похожие мероприятия',style: TextStyle(color: Colors.black),),
+                  SizedBox(width: 6,),
+                Expanded(
+                  child: Divider(
+                    thickness: 0.5,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                SizedBox(width: 16,),  ],
+              ),
+              SizedBox(height: 30),
+              StreamBuilder<DatabaseEvent>(
+                stream: databaseReference.onValue,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data != null) {
+                    DataSnapshot dataValues = snapshot.data!.snapshot;
+                    if (dataValues.value != null) {
+                      List<dynamic> events = [];
+                      dynamic data = dataValues.value;
+                      if (data is List) {
+                        events.addAll(data);
+                      } else if (data is Map) {
+                        data.forEach((key, value) {
+                          events.add(value);
+                        });
+                      }
+
+                      events = events.where((event) {
+                        DateTime eventDate = DateTime.parse(event['date']);
+                        return (type.contains(event['type']) && title!=event["title"]);
+                      }).toList();
+
+                      final double screenWidth = MediaQuery.of(context).size.width;
+                      final double screenHeight = MediaQuery.of(context).size.height;
+                      int crossAxisCount = 2;
+                      if (screenWidth>screenHeight) {
+                        crossAxisCount = 4;
+                      }
+
+                      return Align(
+                        alignment: Alignment.center,
+                        child: Container( 
+                          height: 400,
+                          child: GridView.builder(
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: crossAxisCount,
+                              crossAxisSpacing: 16.0,
+                              mainAxisSpacing: 16.0,
+                              childAspectRatio: 1,
+                            ),
+                            itemCount: events.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => EventDetailsPage(
+                                        startDate: events[index]['date'],
+                                        endDate: events[index]['end_date'],
+                                        title: events[index]['title'],
+                                        type: events[index]['type'],
+                                        smallDescription: events[index]['small_description'],
+                                        largeDescription: events[index]['full_description'])),
+                                  );
+                                },
+
+                                child: Card(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: Column(
+                                      children: <Widget>[
+                                        Expanded(
+                                          child: Icon(
+                                            getIconForCategory(events[index]['type']),
+                                            size: 64,
+                                          ),
+                                        ),
+                                        SizedBox(height: 8.0),
+                                        Text(
+                                          events[index]['title'],
+                                          style: TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                        SizedBox(height: 8.0),
+                                        Text(events[index]['small_description']),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      );
+                    } else {
+                      return Center(child: Text('Данные не найдены'));
+                    }
+                  } else {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

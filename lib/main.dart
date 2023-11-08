@@ -1,5 +1,5 @@
 import 'dart:js';
-
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -60,34 +60,41 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  void signUserIn() async {
+  void signUserIn(BuildContext context) async {
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: emailcontroller.text, password: passwordcontroller.text);
-      // If sign-in is successful, you might want to navigate to another screen or perform some UI update
-      // For example:
-      // Navigator.pushReplacementNamed(context, '/home'); // Adjust the route as needed
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => EventList()),
+      );
     } on FirebaseAuthException catch (e) {
       print(e.code);
       String errorMessage;
       if (e.code == 'user-not-found' || e.code == 'wrong-password') {
-        errorMessage = 'Неправильный email или пароль. Повторите попытку';
-        ScaffoldMessenger.of(context as BuildContext)
-            .showSnackBar(SnackBar(content: Text('$errorMessage')));
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.error,
+          animType: AnimType.BOTTOMSLIDE,
+          title: 'Ошибка',
+          desc: 'Неправильный email или пароль. Повторите попытку',
+          btnOkOnPress: () {},
+          btnOkColor: Colors.red
+        )..show();
       } else {
-        errorMessage = "Произошла ошибка, попробуйте снова";
-        ScaffoldMessenger.of(context as BuildContext)
-            .showSnackBar(SnackBar(content: Text('$errorMessage')));
+        AwesomeDialog(
+          context: context,
+          dialogType: DialogType.ERROR,
+          animType: AnimType.BOTTOMSLIDE,
+          title: 'Ошибка',
+          desc: 'Неправильный email или пароль. Повторите попытку',
+          btnOkOnPress: () {},
+            btnOkColor: Colors.red
+        )..show();
       }
-      // Using a ScaffoldMessenger directly with the current BuildContext
-      ScaffoldMessenger.of(context as BuildContext).showSnackBar(
-        SnackBar(
-          content: Text(errorMessage),
-          backgroundColor: Colors.red,
-        ),
-      );
     }
   }
+
 
 
   TextEditingController emailcontroller = TextEditingController();
@@ -397,7 +404,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
                                       // Call your registration logic here
-                                      signUserIn();
+                                      signUserIn(context);
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(

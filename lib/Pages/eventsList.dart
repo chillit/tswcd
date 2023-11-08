@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'dart:math';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:tswcd/Pages/EcentPage.dart';
 
 import '../main.dart';
 
@@ -17,20 +18,19 @@ class _EventListState extends State<EventList> {
   final databaseReference = FirebaseDatabase.instance.reference().child('events');
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   DateTime? _selectedDay;
+  Map<String, List<IconData>> categoryIcons = {
+    'it': [Icons.computer, Icons.desktop_mac, Icons.router],
+    'study': [Icons.menu_book, Icons.school, Icons.library_books],
+    'charity': [Icons.favorite, Icons.volunteer_activism, Icons.favorite_border],
+    'sport': [Icons.sports_soccer, Icons.sports_basketball, Icons.sports_baseball],
+    'culture': [Icons.palette, Icons.theater_comedy, Icons.music_note],
+  };
   IconData getIconForCategory(String category) {
-    switch (category) {
-      case 'IT':
-        return Icons.computer;
-      case 'study':
-        return Icons.menu_book;
-      case 'charity':
-        return Icons.favorite;
-      case 'sport':
-        return Icons.sports_soccer;
-      case 'culture':
-        return Icons.palette;
-      default:
-        return Icons.event;
+    if (categoryIcons.containsKey(category)) {
+      List<IconData> icons = categoryIcons[category]!;
+      return icons[Random().nextInt(icons.length)];
+    } else {
+      return Icons.event;
     }
   }
   List<List<String>> setsOfCategories = [
@@ -92,8 +92,9 @@ class _EventListState extends State<EventList> {
                 }).toList();
 
                 final double screenWidth = MediaQuery.of(context).size.width;
+                final double screenHeight = MediaQuery.of(context).size.height;
                 int crossAxisCount = 2;
-                if (screenWidth > 600) {
+                if (screenWidth>screenHeight) {
                   crossAxisCount = 4;
                 }
 
@@ -106,25 +107,40 @@ class _EventListState extends State<EventList> {
                   ),
                   itemCount: events.length,
                   itemBuilder: (BuildContext context, int index) {
-                    return Card(
-                      child: Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Column(
-                          children: <Widget>[
-                            Expanded(
-                              child: Icon(
-                                getIconForCategory(events[index]['type']),
-                                size: 64,
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => EventDetailsPage(
+                              startDate: events[index]['date'],
+                              endDate: events[index]['end_date'],
+                              title: events[index]['title'],
+                              type: events[index]['type'],
+                              smallDescription: events[index]['small_description'],
+                              largeDescription: events[index]['full_description'])),
+                        );
+                      },
+
+                      child: Card(
+                        child: Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Column(
+                            children: <Widget>[
+                              Expanded(
+                                child: Icon(
+                                  getIconForCategory(events[index]['type']),
+                                  size: 64,
+                                ),
                               ),
-                            ),
-                            SizedBox(height: 8.0),
-                            Text(
-                              events[index]['title'],
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            SizedBox(height: 8.0),
-                            Text(events[index]['small_description']),
-                          ],
+                              SizedBox(height: 8.0),
+                              Text(
+                                events[index]['title'],
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(height: 8.0),
+                              Text(events[index]['small_description']),
+                            ],
+                          ),
                         ),
                       ),
                     );

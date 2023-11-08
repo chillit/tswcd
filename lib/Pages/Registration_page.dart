@@ -486,7 +486,7 @@ class _MyHomePageState extends State<Registration> {
                                     if (_formKey.currentState!.validate()) { // <-- Add this line
                                       // If the form is valid, display a Snackbar.
                                       ScaffoldMessenger.of(context)
-                                          .showSnackBar(SnackBar(content: Text('Processing Data')));
+                                          .showSnackBar(SnackBar(content: Text('Аккаунт успешно создан')));
 
                                       // Call your registration logic here
                                       registerUser(emailcontroller.text.trim(), passwordcontroller.text.trim());

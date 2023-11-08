@@ -55,7 +55,7 @@ class _EventListState extends State<EventList> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('My App'),
+        title: Text('NEskuchnoAta'),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.menu),

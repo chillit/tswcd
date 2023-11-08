@@ -4,7 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:tswcd/Pages/Registration_page.dart';
+import 'package:tswcd/main.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class SnackBarService {
   static const errorColor = Colors.red;
@@ -22,67 +24,64 @@ class SnackBarService {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }
-void main() async{
-  WidgetsFlutterBinding.ensureInitialized();  await Firebase.initializeApp(
-      options: FirebaseOptions(
-          apiKey: "AIzaSyBR32KrGTpnRDYzGdESKXgzSi_puAuhV0o",
-          authDomain: "tswcd-1ddcb.firebaseapp.com",
-          databaseURL: "https://tswcd-1ddcb-default-rtdb.firebaseio.com",
-          projectId: "tswcd-1ddcb",
-          storageBucket: "tswcd-1ddcb.appspot.com",
-          messagingSenderId: "706356993842",
-          appId: "1:706356993842:web:33aeedb99d2c40e0f7012b",
-          measurementId: "G-G5NP5SBK8P")
-  );  runApp(MyApp());
+
+
+
+
+class RegistrationBusi extends StatefulWidget {
+  @override
+  State<RegistrationBusi> createState() => _MyHomePageState();
 }
 
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'NEskuchnoAta',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: MyHomePage(),
-    );
+class _MyHomePageState extends State<RegistrationBusi> {
+  Future<void> signupemailpass(String email, String pass) async {
+    await _auth.signInWithEmailAndPassword(email: email, password: pass);
   }
-}
 
-class MyHomePage extends StatefulWidget {
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
+  final FirebaseDatabase _database = FirebaseDatabase.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-class _MyHomePageState extends State<MyHomePage> {
-  void signUserIn() async {
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: emailcontroller.text, password: passwordcontroller.text);
-    } on FirebaseAuthException catch (e) {
-      print(e.code);
-      if (e.code == 'user-not-found' || e.code == 'wrong-password') {
-        SnackBarService.showSnackBar(
-          context as BuildContext,
-          'Неправильный email или пароль. Повторите попытку',
-          true,
-        );
-        return;
+  void _saveToDatabase() async {
+    FirebaseAuth.instance.authStateChanges().listen((User? user) async {
+      if (user == null) {
+        print('User is currently signed out!');
       } else {
-        SnackBarService.showSnackBar(
-          context as BuildContext,
-          "Введите все данные корректно",
-          true,
-        );
-        return;
+        String currentDate = DateTime.now().toIso8601String().split('T')[0];
+        // Retrieve the name using the UID from the users branch
+        final nameSnapshot = await FirebaseDatabase.instance.ref('users/${user.uid}').once();
+        String name = nameSnapshot.snapshot.value?.toString() ?? '';
+
+        // Set the user's email and name in the database under the 'users' branch
+        await FirebaseDatabase.instance.ref('users/${user.uid}').set({
+          'email': user.email,
+          'name': namecontroller.text.trim(),
+          'IIN': IINcontroller.text.trim(),
+          'role': 'Busi',
+          'interests': {
+            'sport': 0,
+            'IT':0,
+            'culture':0,
+            'charity':0,
+            'study':0,
+          }
+        });
       }
+    });
+  }
+  Future<void> registerUser(String email, String password) async {
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+    } on FirebaseAuthException catch (e) {
+
     }
   }
-
+  TextEditingController IINcontroller = TextEditingController();
   TextEditingController emailcontroller = TextEditingController();
-
+  TextEditingController namecontroller=TextEditingController();
   TextEditingController passwordcontroller = TextEditingController();
 
   @override
@@ -93,7 +92,9 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void dispose() {
     super.dispose();
+    IINcontroller.dispose();
     emailcontroller.dispose();
+    namecontroller.dispose();
     passwordcontroller.dispose();
   }
 
@@ -140,7 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             ),
                             SizedBox(height: 10,),
                             Text(
-                              'Добро пожаловать на NEskuchnoAta,\nсистему поиска развлечения в Алмате',
+                              'Добро пожаловать на NEskuchnoAta,\n систему поиска развлечения в Алмате',
                               style: TextStyle(fontFamily: "Futura"),
                               textAlign: TextAlign.center,
                             ),
@@ -163,7 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   MediaQuery.of(context).size.shortestSide /
                                       2,
                                   child: Container(
-                                    
+
                                     width: 300,
                                     height: 230,
                                     decoration:
@@ -171,7 +172,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(67.0),
                                       child: Image.asset(
-                                        
+
                                         'assets/images/SkuchnoAta.png',
                                         fit: BoxFit.contain,
                                       ),
@@ -196,7 +197,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               Padding(
                                 padding: EdgeInsets.only(left: 8),
                                 child: Text(
-                                  'Введите почту:',
+                                  'Введите свое ИИН:',
                                   style: TextStyle(
                                     fontFamily: 'Futura',
                                     fontSize: 20,
@@ -207,6 +208,168 @@ class _MyHomePageState extends State<MyHomePage> {
                               SizedBox(
                                 height: 10,
                               ),
+                              Padding(
+                                padding:
+                                EdgeInsetsDirectional.fromSTEB(8, 0, 8, 0),
+                                child: Container(
+                                  width: 450,
+                                  height: 50,
+                                  child: TextFormField(
+                                    controller: IINcontroller,
+                                    textCapitalization: TextCapitalization.none,
+                                    obscureText: false,
+                                    decoration: InputDecoration(
+                                      filled: true,
+                                      fillColor:
+                                      Color.fromRGBO(46, 46, 93, 0.04),
+                                      labelText: 'ИИН',
+                                      labelStyle: TextStyle(
+                                        fontFamily: 'Futura',
+                                        fontWeight: FontWeight.normal,
+                                      ),
+                                      floatingLabelStyle: TextStyle(
+                                        fontFamily: 'Futura',
+                                        fontWeight: FontWeight.normal,
+                                        color: Colors.brown,
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.grey,
+                                          width: 1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.black,
+                                          width: 1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                      errorBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.red,
+                                          width: 2,
+                                        ),
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                      focusedErrorBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.red,
+                                          width: 2,
+                                        ),
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                    ),
+                                    style: TextStyle(
+                                      fontFamily: 'Futura',
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                    keyboardType: TextInputType.emailAddress,
+                                    // validator:
+                                    //     (email)=>
+                                    // email !=null && ! EmailValidator.validate(email)
+                                    //     ? 'Введите правильную почту'
+                                    //     : null,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 20,),
+                              Padding(
+                                padding: EdgeInsets.only(left: 8),
+                                child: Text(
+                                  'Введите свое имя:',
+                                  style: TextStyle(
+                                    fontFamily: 'Futura',
+                                    fontSize: 20,
+                                  ),
+                                  textAlign: TextAlign.start,
+                                ),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Padding(
+                                padding:
+                                EdgeInsetsDirectional.fromSTEB(8, 0, 8, 0),
+                                child: Container(
+                                  width: 450,
+                                  height: 50,
+                                  child: TextFormField(
+                                    controller: namecontroller,
+                                    textCapitalization: TextCapitalization.none,
+                                    obscureText: false,
+                                    decoration: InputDecoration(
+                                      filled: true,
+                                      fillColor:
+                                      Color.fromRGBO(46, 46, 93, 0.04),
+                                      labelText: 'Имя',
+                                      labelStyle: TextStyle(
+                                        fontFamily: 'Futura',
+                                        fontWeight: FontWeight.normal,
+                                      ),
+                                      floatingLabelStyle: TextStyle(
+                                        fontFamily: 'Futura',
+                                        fontWeight: FontWeight.normal,
+                                        color: Colors.brown,
+                                      ),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.grey,
+                                          width: 1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.black,
+                                          width: 1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                      errorBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.red,
+                                          width: 2,
+                                        ),
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                      focusedErrorBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Colors.red,
+                                          width: 2,
+                                        ),
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                    ),
+                                    style: TextStyle(
+                                      fontFamily: 'Futura',
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                    keyboardType: TextInputType.emailAddress,
+                                    // validator:
+                                    //     (email)=>
+                                    // email !=null && ! EmailValidator.validate(email)
+                                    //     ? 'Введите правильную почту'
+                                    //     : null,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 20,),
+                              Padding(
+                                padding: EdgeInsets.only(left: 8),
+                                child: Text(
+                                  'Введите почту:',
+                                  style: TextStyle(
+                                    fontFamily: 'Futura',
+                                    fontSize: 20,
+                                  ),
+                                  textAlign: TextAlign.start,
+                                ),
+                              ),
+                              SizedBox(height: 15,),
                               Padding(
                                 padding:
                                 EdgeInsetsDirectional.fromSTEB(8, 0, 8, 0),
@@ -373,7 +536,8 @@ class _MyHomePageState extends State<MyHomePage> {
                               width: 300,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  signUserIn();
+                                  registerUser(emailcontroller.text.trim(),passwordcontroller.text.trim());
+                                  _saveToDatabase();
                                 },
                                 style: ElevatedButton.styleFrom(
                                   padding: EdgeInsets.symmetric(horizontal: 24),
@@ -389,7 +553,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Text(
-                                      'Войти в аккаунт',
+                                      'Зарегестрироваться',
                                       style: TextStyle(
                                         fontWeight: FontWeight.w100,
                                         fontFamily: 'Futura',
@@ -427,28 +591,45 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-
                               Flexible(
                                 child: Text(
-                                  'Если у вас нет аккаунта',
+                                  'Если у вас есть аккаунт',
                                   softWrap: true,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(color: Colors.grey[700]),
                                 ),
                               ),
-                        GestureDetector(
-                          child: Text(
-                            ' зарегестритруйтесь ',
-                            style: TextStyle(color: Colors.blue),
-                          ),
-                          onTap: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (context) => Registration()),
-                            );
-
-                          },
-                        ),
+                              GestureDetector(
+                                child: Text(
+                                  ' войдите ',
+                                  style: TextStyle(color: Colors.blue),
+                                ),
+                                onTap: () {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => MyHomePage()),
+                                  );
+                                },
+                              ),
+                              Flexible(
+                                  child: Text(
+                                    'А если вы обычный пользователь,то заходите ',
+                                    softWrap: true,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: Colors.grey[700]),
+                                  )),
+                              GestureDetector(
+                                child: Text(
+                                  'сюда ',
+                                  style: TextStyle(color: Colors.blue),
+                                ),
+                                onTap: () {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => Registration()),
+                                  );
+                                },
+                              ),
                             ],
                           ),
                         ),

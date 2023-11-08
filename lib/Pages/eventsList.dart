@@ -82,7 +82,7 @@ class _EventListState extends State<EventList> {
     Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('My App'),
+        title: Text('NEskuchnoAta'),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.menu),

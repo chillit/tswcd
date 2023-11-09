@@ -39,7 +39,7 @@ class _EventListState extends State<EventList> {
     super.initState();
     getCurrentUserData();
   }
-  List<String> _categories = ['IT', 'study', 'charity', 'sport', 'culture'];
+  List<String> _categories = ['IT', 'study', 'charity', 'sport', 'culture', 'music', 'comedy'];
   List<String> _selectedCategories = [];
   final databaseReference = FirebaseDatabase.instance.reference().child('events');
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
@@ -49,7 +49,9 @@ class _EventListState extends State<EventList> {
     'study': [Icons.menu_book, Icons.school, Icons.library_books],
     'charity': [Icons.favorite, Icons.volunteer_activism, Icons.favorite_border],
     'sport': [Icons.sports_soccer, Icons.sports_basketball, Icons.sports_baseball],
-    'culture': [Icons.palette, Icons.theater_comedy, Icons.music_note],
+    'culture': [Icons.palette, Icons.movie, Icons.music_note], // Updated culture icon
+    'music': [Icons.music_note, Icons.headset, Icons.queue_music], // Added music icons
+    'comedy': [Icons.mic_rounded, Icons.sentiment_satisfied, Icons.face] // Added comedy icons
   };
   IconData getIconForCategory(String category) {
     if (categoryIcons.containsKey(category)) {
@@ -62,7 +64,7 @@ class _EventListState extends State<EventList> {
   List<List<String>> setsOfCategories = [
     ['IT', 'study', 'charity'],
     ['sport', 'culture'], // Example of a second set of categories
-    // ... potentially more sets
+    ["comedy",'music']
   ];
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -243,11 +245,17 @@ class _EventListState extends State<EventList> {
               },
               onDaySelected: (selectedDay, focusedDay) {
                 setState(() {
-                  _selectedDay = selectedDay;
+                  if (isSameDay(_selectedDay, selectedDay)) {
+                    // The selected day is already chosen, so clear the filter
+                    _selectedDay = null;
+                    _selectedCategories.clear();
+                  } else {
+                    _selectedDay = selectedDay;
+                  }
                 });
               },
               headerStyle: HeaderStyle(
-                formatButtonVisible: false, // Устанавливаем значение false, чтобы скрыть кнопку
+                formatButtonVisible: false,
                 titleCentered: true,
               ),
             ),

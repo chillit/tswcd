@@ -41,11 +41,13 @@ class EventDetailsPage extends StatelessWidget {
     return months[dateTime.month];
   }
   Map<String, List<IconData>> categoryIcons = {
-    'it': [Icons.computer, Icons.desktop_mac, Icons.router],
+    'IT': [Icons.computer, Icons.desktop_mac, Icons.router],
     'study': [Icons.menu_book, Icons.school, Icons.library_books],
     'charity': [Icons.favorite, Icons.volunteer_activism, Icons.favorite_border],
     'sport': [Icons.sports_soccer, Icons.sports_basketball, Icons.sports_baseball],
-    'culture': [Icons.palette, Icons.theater_comedy, Icons.music_note],
+    'culture': [Icons.palette, Icons.movie, Icons.music_note], // Updated culture icon
+    'music': [Icons.music_note, Icons.headset, Icons.queue_music], // Added music icons
+    'comedy': [Icons.mic_rounded, Icons.sentiment_satisfied, Icons.face] // Added comedy icons
   };
 
   IconData getIconForCategory(String category) {
@@ -95,7 +97,7 @@ class EventDetailsPage extends StatelessWidget {
                         ),
                         SizedBox(height: 10),
                         Text(
-                          '${type == "charity"?"Благотворительноость":type == "sport"?"Спорт":type == "culture"?"Культура":type == "study"?"Учеба":type == "IT"?"IT":""}',
+                          '${type == "charity"?"Благотворительноость":type == "sport"?"Спорт":type == "culture"?"Культура":type == "study"?"Учеба":type == "IT"?"IT":type == "comedy"?"Комедия":type == "music"?"Музыка":""}',
                           style: TextStyle(fontSize: 18),
                         ),
                         SizedBox(height: 10),

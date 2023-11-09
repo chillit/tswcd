@@ -1,4 +1,4 @@
-import 'dart:js';
+
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -6,8 +6,6 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:tswcd/Pages/Registration_page.dart';
 import 'package:tswcd/Pages/eventsList.dart';
-import 'package:url_launcher/url_launcher.dart';
-
 class SnackBarService {
   static const errorColor = Colors.red;
   static const okColor = Colors.green;
@@ -66,27 +64,39 @@ class _MyHomePageState extends State<MyHomePage> {
     final eventsRef = databaseRef.child('events');
 
     eventsRef.once().then((DatabaseEvent snapshot) {
-      Map<dynamic, dynamic> values = snapshot.snapshot.value as Map<dynamic, dynamic>;
-      values.forEach((key, values) {
-        // Получите end_date из значений
-        DateTime endDate = DateTime.parse(values['end_date']);
+      // Check if the data is a List
+      if (snapshot.snapshot.value is List<dynamic>) {
+        List<dynamic> valuesList = snapshot.snapshot.value as List<dynamic>;
 
-        // Получите текущую дату
-        DateTime now = DateTime.now();
+        // Iterate through the list
+        for (var i = 0; i < valuesList.length; i++) {
+          // Check if the current item is a Map
+          if (valuesList[i] is Map<dynamic, dynamic>) {
+            Map<dynamic, dynamic> values = valuesList[i];
+            // Proceed with your logic
+            DateTime endDate = DateTime.parse(values['end_date']);
+            DateTime now = DateTime.now();
 
-        // Сравните даты и выполните необходимые действия
-        if (endDate.isBefore(now)) {
-          print('Document with key $key has end_date before today.');
-          // Удалите документ из базы данных
-          eventsRef.child(key).remove().then((_) {
-            print("Document deleted successfully");
-          }).catchError((error) {
-            print("Failed to delete the document: $error");
-          });
+            if (endDate.isBefore(now)) {
+              print('Document at index $i has end_date before today.');
+              // Remove the document from the database
+              eventsRef.child(i.toString()).remove().then((_) {
+                print("Document deleted successfully");
+              }).catchError((error) {
+                print("Failed to delete the document: $error");
+              });
+            }
+          }
         }
-      });
+      } else if (snapshot.snapshot.value is Map<dynamic, dynamic>) {
+        Map<dynamic, dynamic> values = snapshot.snapshot.value as Map<dynamic, dynamic>;
+        values.forEach((key, values) {
+          // Your existing logic
+        });
+      }
     });
   }
+
   void signUserIn(BuildContext context) async {
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(

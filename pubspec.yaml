@@ -30,13 +30,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  url_launcher: ^6.0.9
-  flutter_localization: any
   firebase_core: any
   firebase_database: ^10.2.3
   firebase_auth: ^4.4.2
-  cloud_firestore: any
-  cloud_functions: ^4.3.3
   table_calendar: any
   awesome_dialog: any
 

@@ -63,7 +63,7 @@ class EventDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Event Details'),
+        title: Text('Мероприятие'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -173,7 +173,7 @@ class EventDetailsPage extends StatelessWidget {
                       return Align(
                         alignment: Alignment.center,
                         child: Container( 
-                          height: 400,
+                          height: 600,
                           child: GridView.builder(
                             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: crossAxisCount,

@@ -90,32 +90,27 @@ class EventDetailsPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Title: $title',
+                          '$title',
                           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                         ),
                         SizedBox(height: 10),
                         Text(
-                          'Type: $type',
+                          '${type == "charity"?"Благотворительноость":type == "sport"?"Спорт":type == "culture"?"Культура":type == "study"?"Учеба":type == "IT"?"IT":""}',
                           style: TextStyle(fontSize: 18),
                         ),
                         SizedBox(height: 10),
                         Text(
-                          'Start Date: $startDate',
+                          '$startDate : $endDate',
                           style: TextStyle(fontSize: 18),
                         ),
                         SizedBox(height: 10),
                         Text(
-                          'End Date: $endDate',
+                          '$smallDescription',
                           style: TextStyle(fontSize: 18),
                         ),
                         SizedBox(height: 10),
                         Text(
-                          'Small Description: $smallDescription',
-                          style: TextStyle(fontSize: 18),
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          'Large Description: $largeDescription',
+                          '$largeDescription',
                           style: TextStyle(fontSize: 18),
                         ),
                       ],
@@ -208,7 +203,7 @@ class EventDetailsPage extends StatelessWidget {
                                         Expanded(
                                           child: Icon(
                                             getIconForCategory(events[index]['type']),
-                                            size: 64,
+                                            size: 100,
                                           ),
                                         ),
                                         SizedBox(height: 8.0),

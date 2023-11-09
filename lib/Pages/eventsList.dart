@@ -82,13 +82,17 @@ class _EventListState extends State<EventList> {
     Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('NEskuchnoAta'),
+        automaticallyImplyLeading: false,
+        title: Center(child: Text('NEskuchnoAta')),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.menu),
-            onPressed: () {
-              _scaffoldKey.currentState!.openEndDrawer();
-            },
+          Padding(
+            padding: const EdgeInsets.only(left: 12.0),
+            child: IconButton(
+              icon: Icon(Icons.menu),
+              onPressed: () {
+                _scaffoldKey.currentState!.openEndDrawer();
+              },
+            ),
           ),
         ],
       ),
@@ -191,7 +195,7 @@ class _EventListState extends State<EventList> {
                               Expanded(
                                 child: Icon(
                                   getIconForCategory(events[index]['type']),
-                                  size: 64,
+                                  size: 100,
                                 ),
                               ),
                               SizedBox(height: 8.0),
@@ -201,6 +205,11 @@ class _EventListState extends State<EventList> {
                               ),
                               SizedBox(height: 8.0),
                               Text(events[index]['small_description']),
+                              SizedBox(height: 8.0),
+                              Text(
+                                "${events[index]['date']} : ${events[index]['end_date']}",
+                                style: TextStyle(fontStyle: FontStyle.italic),
+                              ),
                             ],
                           ),
                         ),
@@ -307,15 +316,15 @@ class _EventListState extends State<EventList> {
               ),
             ),
             SizedBox(height: 5,),
-            Padding(
+            currentUserData["role"]=="Busi"?Padding(
               padding: EdgeInsetsDirectional.only(start: 16,end: 16),
               child: Divider(
                 thickness: 0.5,
                 color: Colors.grey[700],
               ),
-            ),
+            ):Container(),
             SizedBox(height: 10,),
-            Padding(
+            currentUserData["role"]=="Busi"?Padding(
               padding: EdgeInsetsDirectional.only(start: 20,end: 20),
               child: ElevatedButton(onPressed: (){}, child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -332,7 +341,7 @@ class _EventListState extends State<EventList> {
                   ),
                 ],
               ),),
-            ),
+            ):Container(),
             SizedBox(height: 15,),
             Row(
               children: [

@@ -173,7 +173,7 @@ class EventDetailsPage extends StatelessWidget {
                       return Align(
                         alignment: Alignment.center,
                         child: Container( 
-                          height: 400,
+                          height: 600,
                           child: GridView.builder(
                             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: crossAxisCount,

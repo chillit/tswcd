@@ -63,7 +63,7 @@ class EventDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Event Details'),
+        title: Text('Мероприятия'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

@@ -1,6 +1,8 @@
 
 import 'dart:math';
+import 'package:url_launcher/url_launcher.dart';
 
+import '';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
@@ -58,6 +60,21 @@ class EventDetailsPage extends StatelessWidget {
       return Icons.event;
     }
   }
+  Future<void> _addToGoogleCalendar() async {
+    final String eventTitle = Uri.encodeComponent(title);
+    final String eventDetails = Uri.encodeComponent(largeDescription);
+    final String eventLocation = Uri.encodeComponent('Event Location'); // Replace with actual location if available
+    final String eventStartTime = startDate.replaceAll('-', '').replaceAll(':', '') + 'Z';
+    final String eventEndTime = endDate.replaceAll('-', '').replaceAll(':', '') + 'Z';
+    final String googleCalendarUrl =
+        'https://calendar.google.com/calendar/render?action=TEMPLATE&text=$eventTitle&details=$eventDetails&location=$eventLocation&dates=$eventStartTime/$eventEndTime';
+
+    if (await canLaunchUrl(Uri.parse(googleCalendarUrl))) {
+      await launchUrl(Uri.parse(googleCalendarUrl));
+    } else {
+      throw 'Could not launch $googleCalendarUrl';
+    }
+  }
   final databaseReference = FirebaseDatabase.instance.reference().child('events');
   @override
   Widget build(BuildContext context) {
@@ -87,6 +104,14 @@ class EventDetailsPage extends StatelessWidget {
                     ],
                   ),
                   SizedBox(width: 20),
+                  ElevatedButton(
+                    onPressed: _addToGoogleCalendar,
+                    child: Text('Добавить в Google Календарь'),
+                    style: ElevatedButton.styleFrom(
+                      primary: Theme.of(context).primaryColor, // Use the theme's primary color
+                      onPrimary: Colors.white, // Use white text color
+                    ),
+                  ),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

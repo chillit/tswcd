@@ -60,12 +60,22 @@ class EventDetailsPage extends StatelessWidget {
       return Icons.event;
     }
   }
+  String formatDateTimeToUtc(String dateTimeString) {
+    DateTime dateTime = DateTime.parse(dateTimeString).toUtc();
+    String formattedDate = "${dateTime.year.toString().padLeft(4, '0')}"
+        "${dateTime.month.toString().padLeft(2, '0')}"
+        "${dateTime.day.toString().padLeft(2, '0')}T"
+        "${dateTime.hour.toString().padLeft(2, '0')}"
+        "${dateTime.minute.toString().padLeft(2, '0')}00Z";
+    return formattedDate;
+  }
+
   Future<void> _addToGoogleCalendar() async {
     final String eventTitle = Uri.encodeComponent(title);
     final String eventDetails = Uri.encodeComponent(largeDescription);
     final String eventLocation = Uri.encodeComponent('Event Location'); // Replace with actual location if available
-    final String eventStartTime = startDate.replaceAll('-', '').replaceAll(':', '') + 'Z';
-    final String eventEndTime = endDate.replaceAll('-', '').replaceAll(':', '') + 'Z';
+    final String eventStartTime = formatDateTimeToUtc(startDate);
+    final String eventEndTime = formatDateTimeToUtc(endDate);
     final String googleCalendarUrl =
         'https://calendar.google.com/calendar/render?action=TEMPLATE&text=$eventTitle&details=$eventDetails&location=$eventLocation&dates=$eventStartTime/$eventEndTime';
 

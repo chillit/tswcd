@@ -73,7 +73,7 @@ class EventDetailsPage extends StatelessWidget {
   Future<void> _addToGoogleCalendar() async {
     final String eventTitle = Uri.encodeComponent(title);
     final String eventDetails = Uri.encodeComponent(largeDescription);
-    final String eventLocation = Uri.encodeComponent('Event Location'); // Replace with actual location if available
+    final String eventLocation = Uri.encodeComponent('Place');
     final String eventStartTime = formatDateTimeToUtc(startDate);
     final String eventEndTime = formatDateTimeToUtc(endDate);
     final String googleCalendarUrl =
@@ -85,6 +85,7 @@ class EventDetailsPage extends StatelessWidget {
       throw 'Could not launch $googleCalendarUrl';
     }
   }
+
   final databaseReference = FirebaseDatabase.instance.reference().child('events');
   @override
   Widget build(BuildContext context) {

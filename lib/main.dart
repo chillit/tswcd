@@ -35,10 +35,15 @@ void main() async{
           messagingSenderId: "706356993842",
           appId: "1:706356993842:web:33aeedb99d2c40e0f7012b",
           measurementId: "G-G5NP5SBK8P")
-  );  runApp(MyApp());
+  );
+  User? currentUser = FirebaseAuth.instance.currentUser;
+  runApp(MyApp(home: currentUser == null ? MyHomePage() : EventList()));
 }
 
 class MyApp extends StatelessWidget {
+  final Widget home;
+
+  MyApp({required this.home});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -50,7 +55,8 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(),
+
+      home: this.home,
     );
   }
 }

@@ -1,4 +1,5 @@
-import 'dart:js';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -7,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:tswcd/Pages/Registration_page.dart';
 import 'package:tswcd/Pages/eventsList.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import 'firebase_options.dart';
 class SnackBarService {
   static const errorColor = Colors.red;
   static const okColor = Colors.green;
@@ -25,16 +26,9 @@ class SnackBarService {
   }
 }
 void main() async{
-  WidgetsFlutterBinding.ensureInitialized();  await Firebase.initializeApp(
-      options: FirebaseOptions(
-          apiKey: "AIzaSyBR32KrGTpnRDYzGdESKXgzSi_puAuhV0o",
-          authDomain: "tswcd-1ddcb.firebaseapp.com",
-          databaseURL: "https://tswcd-1ddcb-default-rtdb.firebaseio.com",
-          projectId: "tswcd-1ddcb",
-          storageBucket: "tswcd-1ddcb.appspot.com",
-          messagingSenderId: "706356993842",
-          appId: "1:706356993842:web:33aeedb99d2c40e0f7012b",
-          measurementId: "G-G5NP5SBK8P")
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
   );
   User? currentUser = FirebaseAuth.instance.currentUser;
   runApp(MyApp(home: currentUser == null ? MyHomePage() : EventList()));
@@ -212,8 +206,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
   bool isDesktop(BuildContext context) => MediaQuery.of(context).size.width > MediaQuery.of(context).size.height;
 
+  List<Team> teams = [];
+
+  // get teams
+  Future getTeams() async {
+    var response = await http.get(Uri.https('balldontlie.io', 'api/v1/teams'));
+    print(response.body);
+  }
+
   @override
   Widget build(BuildContext context) {
+    getTeams();
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false,
@@ -597,4 +600,13 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+}
+class Team {
+  final String abbreviation; // eg. LAL
+  final String city; // eg. Los Angeles
+
+  Team({
+    required this.abbreviation,
+    required this.city,
+  });
 }

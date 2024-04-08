@@ -137,7 +137,7 @@ class _MyHomePageState extends State<RegistrationBusi> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(67.0),
                                     child: Image.asset(
-                                      'assets/images/SkuchnoAta.png',
+                                      'assets/images/ptr_neskuchno.png',
                                       fit: BoxFit.contain,
                                     ),
                                   ),
@@ -145,7 +145,7 @@ class _MyHomePageState extends State<RegistrationBusi> {
                               ),
                               SizedBox(height: 10,),
                               Text(
-                                'Добро пожаловать на NEskuchnoAta,\n систему поиска развлечения в Алмате',
+                                'Добро пожаловать на NEskuchnoPtr,\n систему поиска развлечения в Петропавловске',
                                 style: TextStyle(fontFamily: "Futura"),
                                 textAlign: TextAlign.center,
                               ),
@@ -177,7 +177,7 @@ class _MyHomePageState extends State<RegistrationBusi> {
                                         borderRadius: BorderRadius.circular(67.0),
                                         child: Image.asset(
 
-                                          'assets/images/SkuchnoAta.png',
+                                          'assets/images/ptr_neskuchno.png',
                                           fit: BoxFit.contain,
                                         ),
                                       ),
@@ -186,7 +186,7 @@ class _MyHomePageState extends State<RegistrationBusi> {
                                   SizedBox(height: 10,),
 
                                   Text(
-                                    'Добро пожаловать на NEskuchnoAta,\nсистему поиска развлечения в Алмате',
+                                    'Добро пожаловать на NEskuchnoPtr,\nсистему поиска развлечения в Петропавловске',
                                     style: TextStyle(fontFamily: 'Futura'),
                                     textAlign: TextAlign.center,
                                   ),

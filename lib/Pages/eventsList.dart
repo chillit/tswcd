@@ -85,7 +85,7 @@ class _EventListState extends State<EventList> {
       key: _scaffoldKey,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Center(child: Text('NEskuchnoAta')),
+        title: Center(child: Text('NEskuchnoPtr')),
         actions: <Widget>[
           Padding(
             padding: const EdgeInsets.only(left: 12.0),
@@ -159,6 +159,10 @@ class _EventListState extends State<EventList> {
                   ),
                   itemCount: events.length,
                   itemBuilder: (BuildContext context, int index) {
+
+
+                    bool isPhone=screenWidth<600;
+
                     return GestureDetector(
                       onTap: () {
                         final currentUser = FirebaseAuth.instance.currentUser;
@@ -194,7 +198,7 @@ class _EventListState extends State<EventList> {
                           padding: EdgeInsets.all(16.0),
                           child: Column(
                             children: <Widget>[
-                              Expanded(
+                              if (!isPhone) Expanded( // This will hide the icon on phone screens
                                 child: Icon(
                                   getIconForCategory(events[index]['type']),
                                   size: 100,
@@ -204,6 +208,7 @@ class _EventListState extends State<EventList> {
                               Text(
                                 events[index]['title'],
                                 style: TextStyle(fontWeight: FontWeight.bold),
+                                overflow: TextOverflow.ellipsis,
                               ),
                               SizedBox(height: 8.0),
                               Text(events[index]['small_description']),

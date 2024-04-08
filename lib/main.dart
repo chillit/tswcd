@@ -93,7 +93,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
 
-      title: 'NEskuchnoAta',
+      title: 'NEskuchnoPtr',
       theme: ThemeData(
         fontFamily: 'Futura',
         primarySwatch: Colors.blue,
@@ -164,7 +164,7 @@ class _MyHomePageState extends State<MyHomePage> {
         AwesomeDialog(
           context: context,
           dialogType: DialogType.error,
-          animType: AnimType.BOTTOMSLIDE,
+          animType: AnimType.bottomSlide,
           title: 'Ошибка',
           desc: 'Неправильный email или пароль. Повторите попытку',
           btnOkOnPress: () {},
@@ -173,8 +173,8 @@ class _MyHomePageState extends State<MyHomePage> {
       } else {
         AwesomeDialog(
           context: context,
-          dialogType: DialogType.ERROR,
-          animType: AnimType.BOTTOMSLIDE,
+          dialogType: DialogType.error,
+          animType: AnimType.bottomSlide,
           title: 'Ошибка',
           desc: 'Неправильный email или пароль. Повторите попытку',
           btnOkOnPress: () {},
@@ -250,7 +250,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(67.0),
                                     child: Image.asset(
-                                      'assets/images/SkuchnoAta.png',
+                                      'assets/images/ptr_neskuchno.png',
                                       fit: BoxFit.contain,
                                     ),
                                   ),
@@ -258,7 +258,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               ),
                               SizedBox(height: 10,),
                               Text(
-                                'Добро пожаловать на NEskuchnoAta,\nсистему поиска развлечения в Алмате',
+                                'Добро пожаловать на NEskuchnoPtr,\nсистему поиска развлечения в Петропавловске',
                                 style: TextStyle(fontFamily: "Futura"),
                                 textAlign: TextAlign.center,
                               ),
@@ -290,7 +290,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                         borderRadius: BorderRadius.circular(67.0),
                                         child: Image.asset(
 
-                                          'assets/images/SkuchnoAta.png',
+                                          'assets/images/ptr_neskuchno.png',
                                           fit: BoxFit.contain,
                                         ),
                                       ),
@@ -299,7 +299,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   SizedBox(height: 10,),
 
                                   Text(
-                                    'Добро пожаловать на NEskuchnoAta,\nсистему поиска развлечения в Алмате',
+                                    'Добро пожаловать на NEskuchnoPtr,\nсистему поиска развлечения в Петропавловске',
                                     style: TextStyle(fontFamily: 'Futura'),
                                     textAlign: TextAlign.center,
                                   ),

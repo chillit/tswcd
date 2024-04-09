@@ -600,55 +600,7 @@ class _MyHomePageState extends State<Registration> {
                     ),
                   ),
                   SizedBox(height: 10,),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 25.0, vertical: 10),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Divider(
-                            thickness: 0.5,
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 10.0),
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width / 2,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                          Flexible(
-                            child: Text(
-                              'А если вы бизнесмэн, то регистрируйтесь ',
-                              softWrap: true,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.grey[700]),
-                            )),
-                                GestureDetector(
-                                  child: Text(
-                                    ' здесь. ',
-                                    style: TextStyle(color: Colors.blue),
-                                  ),
-                                  onTap: () {
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(builder: (context) => RegistrationBusi()),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Divider(
-                            thickness: 0.5,
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+
                 ],
               ),
             ),
